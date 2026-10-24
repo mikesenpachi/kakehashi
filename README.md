@@ -67,6 +67,7 @@ From the repo root:
 | `make zip-vita` | Build the Vita plugins and zip them (`release/kakehashi-vita.zip`) |
 | `make plugin-3ds` | Build the 3DS plugin in Docker |
 | `make zip-3ds` | Build the 3DS plugin and zip it for the SD card (`release/kakehashi-3ds.zip`) |
+| `make demo` | Start a demo server on port 8767 with empty data; then `uv run tools/demo.py` sends demo screens (public domain text, no real game) |
 | `make help` | List all targets |
 
 GitHub Actions runs the tests on Linux, macOS and Windows for each push to `main` and each pull request (`.github/workflows/test.yml`).
@@ -76,7 +77,7 @@ GitHub Actions runs the tests on Linux, macOS and Windows for each push to `main
 | `kakehashi-web/` | The webapp (FastAPI, SQLite) |
 | `kakehashi-vita/` | Vita plugins in C: capture (kernel) and sender (SceShell) |
 | `kakehashi-3ds/` | 3DS plugin in C++ (CTRPluginFramework) |
-| `tools/` | Scripts for the webapp data |
+| `tools/` | Scripts for the webapp data, and `demo.py` for recordings |
 | `experiments/` | OCR test scripts |
 
 All devices use one contract, the Shot API: `POST /shot?game=<id>` with the image as the body. A new device needs only that.
