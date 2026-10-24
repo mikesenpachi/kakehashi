@@ -1,5 +1,7 @@
 # kakehashi
 
+[![Tests](https://github.com/mikesenpachi/kakehashi/actions/workflows/test.yml/badge.svg)](https://github.com/mikesenpachi/kakehashi/actions/workflows/test.yml)
+
 **kakehashi** (架け橋, "bridge") helps you read Japanese games.
 
 Press a button combo while you play on a PS Vita (also PSP and PS1 games in Adrenaline) or a 3DS. The screenshot goes to a webapp on your computer, which reads the text with OCR. You read the text in the browser and look up words with [Yomitan](https://yomitan.wiki/).
@@ -66,6 +68,8 @@ From the repo root:
 | `make plugin-3ds` | Build the 3DS plugin in Docker |
 | `make zip-3ds` | Build the 3DS plugin and zip it for the SD card (`release/kakehashi-3ds.zip`) |
 | `make help` | List all targets |
+
+GitHub Actions runs the tests on Linux, macOS and Windows for each push to `main` and each pull request (`.github/workflows/test.yml`).
 
 | Folder | Contents |
 |---|---|
