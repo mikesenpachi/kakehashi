@@ -11,9 +11,9 @@ Needs a Vita with HENkaku / taiHEN, tested on firmware 3.65. PSP and PS1 games i
 
 ## Install on the Vita
 
-Use the files from the GitHub release, or build them (below).
+Use `kakehashi-vita.zip` from the GitHub release, or build it (below). It has one folder per Vita storage area: `ur0/tai/` has the two plugins, and `ux0/data/kakehashi/` has `config.example.txt`.
 
-1. Copy `kakehashi.skprx` and `kakehashi_sender.suprx` to `ur0:tai/` (VitaShell, over FTP or USB). Over FTP from a computer:
+1. Copy `kakehashi.skprx` and `kakehashi_sender.suprx` from `ur0/tai/` to `ur0:tai/` (VitaShell, over FTP or USB). Over FTP from a computer:
    ```
    curl -T kakehashi.skprx "ftp://<vita ip>:1337/ur0:/tai/kakehashi.skprx"
    curl -T kakehashi_sender.suprx "ftp://<vita ip>:1337/ur0:/tai/kakehashi_sender.suprx"
@@ -26,7 +26,7 @@ Use the files from the GitHub release, or build them (below).
    ur0:tai/kakehashi_sender.suprx
    ```
    taiHEN reads `ux0:tai/config.txt` if it exists, else `ur0:tai/config.txt`. Edit the file that is used, and keep the lines that are already there.
-3. Make `ux0:data/kakehashi/config.txt` (see Config).
+3. Copy `config.example.txt` to `ux0:data/kakehashi/config.txt` and edit it (see Config). The zip has no `config.txt`, so an update never replaces your settings.
 4. Reboot the Vita.
 
 The capture plugin logs to `ux0:data/kakehashi/log.txt` and puts the shots in `ux0:data/kakehashi/queue/` as `<YYYYMMDD-HHMMSS>-<n>_<titleid>.bmp`. The sender logs to `ux0:data/kakehashi/sender.txt`. At boot, a log over 64 KB becomes `log.old.txt` or `sender.old.txt` (the older copy is deleted).
@@ -45,6 +45,7 @@ combo=L+R+SELECT
 - `server` is the computer's IPv4 address (not a name). `port` is the webapp port.
 - `token` must match `KAKEHASHI_TOKEN` on the computer. Leave it empty when no token is set.
 - `combo`: button names joined with `+`, any order, any case, at least 2: `L`, `R`, `SELECT`, `START`, `UP`, `DOWN`, `LEFT`, `RIGHT`, `TRIANGLE`, `CIRCLE`, `CROSS`, `SQUARE`. Default `L+R+SELECT`. `log.txt` shows the combo in use, or the error. Pick buttons the game ignores: a game sees each button until the full combo is down.
+- The plugins read only the first 1023 bytes of the file: keep it short.
 - The sender reads the file 10 s after boot. Without a valid `server` and `port`, it logs the problem and sends nothing.
 
 ## Build
@@ -66,7 +67,7 @@ export VITASDK=$HOME/vitasdk
 export PATH=$VITASDK/bin:$PATH
 ```
 
-Then, from the repo root, `make plugins` builds both: `kakehashi-vita/capture/build/kakehashi.skprx` and `kakehashi-vita/sender/build/kakehashi_sender.suprx`.
+Then, from the repo root, `make plugins` builds both: `kakehashi-vita/capture/build/kakehashi.skprx` and `kakehashi-vita/sender/build/kakehashi_sender.suprx`. `make zip-vita` builds them and makes `release/kakehashi-vita.zip`.
 
 ## Remove, or recover from a bad plugin
 

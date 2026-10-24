@@ -1,0 +1,14 @@
+# kakehashi Vita config. Copy to ux0:data/kakehashi/config.txt, edit, reboot.
+# The webapp's /server page shows the lines for your computer.
+# Lines that start with # are ignored. Keep the file under 1000 bytes.
+
+# IPv4 address and port of the computer that runs the webapp.
+server=192.168.1.10
+port=8766
+
+# KAKEHASHI_TOKEN of the webapp. Leave empty when it has none.
+token=
+
+# Buttons that save a shot, joined with +, at least 2: L R SELECT START
+# UP DOWN LEFT RIGHT TRIANGLE CIRCLE CROSS SQUARE
+combo=L+R+SELECT

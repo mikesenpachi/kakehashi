@@ -62,6 +62,7 @@ From the repo root:
 | `make server` | Start the webapp on port 8766, with reload on `.py` changes |
 | `make test` | Run the webapp unit tests (temporary data, fake OCR, no network) |
 | `make plugins` | Build the Vita plugins (needs VitaSDK, see the Vita README) |
+| `make zip-vita` | Build the Vita plugins and zip them (`release/kakehashi-vita.zip`) |
 | `make plugin-3ds` | Build the 3DS plugin in Docker |
 | `make zip-3ds` | Build the 3DS plugin and zip it for the SD card (`release/kakehashi-3ds.zip`) |
 | `make help` | List all targets |

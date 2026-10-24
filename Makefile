@@ -5,11 +5,12 @@ export VITASDK
 export PATH := $(VITASDK)/bin:$(PATH)
 SERVER ?= http://localhost:8766
 
-.PHONY: help server plugins capture sender plugin-3ds image-3ds zip-3ds samples test prune
+.PHONY: help server plugins capture sender plugin-3ds image-3ds zip-3ds zip-vita samples test prune
 
 help:
 	@echo "make server    start the webapp on port 8766 (reloads on .py changes)"
 	@echo "make plugins   build the Vita capture and sender plugins"
+	@echo "make zip-vita  build the Vita plugins and zip them (release/kakehashi-vita.zip)"
 	@echo "make plugin-3ds build the 3DS plugin in Docker (kakehashi-3ds/kakehashi.3gx)"
 	@echo "make zip-3ds   build the 3DS plugin and zip it for the SD card (release/kakehashi-3ds.zip)"
 	@echo "make samples   upload your shots in samples/ to SERVER (default $(SERVER)); adds them to its database"
@@ -24,6 +25,14 @@ plugins: capture sender
 capture sender:
 	cmake -S kakehashi-vita/$@ -B kakehashi-vita/$@/build
 	cmake --build kakehashi-vita/$@/build
+
+# One folder per Vita storage area: copy ur0/tai/* to ur0:tai/ and ux0/data/kakehashi/* to ux0:data/kakehashi/.
+zip-vita: plugins
+	rm -rf release/sd-vita release/kakehashi-vita.zip
+	mkdir -p release/sd-vita/ur0/tai release/sd-vita/ux0/data/kakehashi
+	cp kakehashi-vita/capture/build/kakehashi.skprx kakehashi-vita/sender/build/kakehashi_sender.suprx release/sd-vita/ur0/tai/
+	cp kakehashi-vita/config.example.txt release/sd-vita/ux0/data/kakehashi/config.example.txt
+	cd release/sd-vita && zip -r -X ../kakehashi-vita.zip ur0 ux0
 
 # The image has devkitARM, libctru, CTRPluginFramework and 3gxtool (kakehashi-3ds/Dockerfile).
 image-3ds:
