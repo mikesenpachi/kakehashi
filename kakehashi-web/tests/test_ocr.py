@@ -59,3 +59,28 @@ def test_lens_failure_raises_ocr_error(monkeypatch):
         assert "no network" in str(error)
     else:
         raise AssertionError("no OCRError")
+
+
+def placed(text: str, x: float, y: float, width: float, height: float = 0.06) -> dict:
+    """A Lens word with its box."""
+    return {"word": text, "geometry": {"center_x": x, "center_y": y, "width": width, "height": height}}
+
+
+def test_a_word_that_lens_returns_twice_at_one_place_is_kept_once():
+    # Real Lens output (demo screen 3): a part of the line comes twice, the extra copy first.
+    words = [
+        placed("薄暗い", 0.219, 0.758, 0.087), placed("した", 0.418, 0.757, 0.035),
+        placed("何", 0.091, 0.764, 0.034), placed("でも", 0.136, 0.762, 0.061),
+        placed("薄暗い", 0.217, 0.762, 0.096), placed("した", 0.420, 0.762, 0.046), placed("所", 0.467, 0.762, 0.029),
+    ]
+    assert ocr.clean_lens(words) == "何でも薄暗いした所"
+
+
+def test_the_same_word_at_two_places_is_kept_twice():
+    words = [placed("た", 0.431, 0.762, 0.015), placed("い", 0.811, 0.762, 0.026), placed("た", 0.841, 0.762, 0.026)]
+    assert ocr.clean_lens(words) == "たいた"
+
+
+def test_different_words_at_one_place_are_both_kept():
+    words = [placed("吾輩", 0.2, 0.76, 0.08), placed("猫", 0.2, 0.76, 0.08), placed("。", 0.3, 0.76, 0.02)]
+    assert ocr.clean_lens(words) == "吾輩猫。"

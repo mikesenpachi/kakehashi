@@ -109,7 +109,7 @@ On the shot page, the header shows the game name, the shot number in its game an
 ## OCR
 
 Google Lens (unofficial API) reads the crop box of the game, or the full screen when there is no box. If Lens fails, `POST /shot` answers 502 and saves nothing; the console keeps the shot in its queue and sends it again later. **Test** and **Use for this shot** show the error. The webapp makes one Lens call at a time: when two reads come together (a shot from the Vita and a **Test** click, or two devices), the second waits. Run one uvicorn worker (the default), because the lock is per process.
-Cleanup drops furigana (words shorter than 60% of the tallest word), removes `▼ > ＞` and spaces, and changes `･･･` to `…`.
+Cleanup drops furigana (words shorter than 60% of the tallest word), drops a word that Lens returns twice at the same place, removes `▼ > ＞` and spaces, and changes `･･･` to `…`.
 The raw OCR output is also saved.
 
 Without a box, speaker names and menus get into the text.
