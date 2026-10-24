@@ -1,0 +1,21 @@
+Author: kakehashi
+
+Version:
+    Major: 0
+    Minor: 1
+    Revision: 0
+
+Targets: # Low title IDs of the games the plugin works with (none: all games)
+
+Title: kakehashi
+
+Summary: Sends screenshots of Japanese game text to the kakehashi webapp
+
+Description: |
+  Press the combo to save the top screen and send it to the kakehashi webapp on your computer.
+
+Compatibility: Any
+
+MemorySize: 5MiB
+
+UsePrivateMemory: false

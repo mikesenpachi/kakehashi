@@ -1,0 +1,17 @@
+.DS_Store
+.venv/
+__pycache__/
+kakehashi-web/data/
+kakehashi-vita/*/build/
+kakehashi-3ds/build/
+kakehashi-3ds/*.elf
+kakehashi-3ds/*.3gx
+
+# Private: notes for the maintainer and Claude Code, and copyrighted game screenshots
+CLAUDE.md
+PLAN.md
+.claude/
+samples/
+
+# Prebuilt plugins for a GitHub release
+release/
