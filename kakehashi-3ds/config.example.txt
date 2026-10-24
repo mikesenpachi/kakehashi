@@ -1,0 +1,17 @@
+# kakehashi 3DS config. Copy this file to sdmc:/kakehashi/config.txt and edit it.
+# The webapp's /server page shows the server and port lines for your computer.
+# Lines that start with # are ignored.
+
+# IPv4 address and port of the computer that runs the webapp.
+server=192.168.1.10
+port=8766
+
+# KAKEHASHI_TOKEN of the webapp. Leave empty when it has none.
+token=
+
+# Buttons that save a shot, joined with +, at least 2:
+# A B X Y L R START SELECT UP DOWN LEFT RIGHT (not ZL or ZR).
+combo=L+SELECT
+
+# A combo for one game: combo.<title ID>=... (log.txt shows "loaded in <title ID>").
+# combo.0004000000108800=L+DOWN

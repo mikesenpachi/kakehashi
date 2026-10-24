@@ -8,13 +8,11 @@ Tested on a New 3DS XL with Luma3DS v13.3.3, in Dragon Quest VIII, Ace Attorney 
 
 ## Install
 
-Use `kakehashi.3gx` from the GitHub release, or build it (below).
+Use `kakehashi-3ds.zip` from the GitHub release, or build it (below).
 
 1. In the Rosalina menu (L + Down + Select), turn on **Plugin Loader**.
-2. Copy `kakehashi.3gx` to the SD card as one of:
-   - `/luma/plugins/default.3gx`: loaded into every game without its own plugin.
-   - `/luma/plugins/<title ID>/kakehashi.3gx`: loaded into that game only.
-3. Make `sdmc:/kakehashi/config.txt` (see Config).
+2. Unzip `kakehashi-3ds.zip` at the root of the SD card. It has `luma/plugins/default.3gx` (loaded into every game without its own plugin) and `kakehashi/config.example.txt`. A `default.3gx` that is already there is replaced. For one game only, move the file to `/luma/plugins/<title ID>/kakehashi.3gx` instead.
+3. Copy `kakehashi/config.example.txt` to `kakehashi/config.txt` and edit it (see Config). The zip has no `config.txt`, so an update never replaces your settings.
 4. Start the game. A "kakehashi loaded" notice shows.
 
 A game loads only one plugin: if a game has its own plugin folder, `default.3gx` is not loaded into it. The framework also makes `/luma/plugins/ActionReplay/` (its cheat feature).
@@ -46,7 +44,7 @@ Needs Docker. From the repo root:
 make plugin-3ds
 ```
 
-The output is `kakehashi-3ds/kakehashi.3gx`. The Docker image (`Dockerfile`) has devkitARM, libctru, CTRPluginFramework (`libctrpf`) and `3gxtool` from devkitPro and ThePixellizerOSS. It is amd64, because `3gxtool` is built only for x86_64 Linux; Docker emulates it on Apple Silicon.
+The output is `kakehashi-3ds/kakehashi.3gx`. `make zip-3ds` builds it and makes `release/kakehashi-3ds.zip` with the SD card folders. The Docker image (`Dockerfile`) has devkitARM, libctru, CTRPluginFramework (`libctrpf`) and `3gxtool` from devkitPro and ThePixellizerOSS. It is amd64, because `3gxtool` is built only for x86_64 Linux; Docker emulates it on Apple Silicon.
 
 ## How it works
 
