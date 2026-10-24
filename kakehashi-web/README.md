@@ -17,7 +17,7 @@ To require a token, start the server with `KAKEHASHI_TOKEN=<token>`. Then each s
 
 - Open http://localhost:8766/ for the home page: the newest shot, the recent shots of all games, and the numbers. "Shots" in the top bar opens the newest shot. The left sidebar shows the shots of the current game by day; the right sidebar shows the games per platform.
 - `--host 0.0.0.0` lets other devices on your Wi-Fi reach the server. The console sends to `http://<computer IP>:8766`. The `/server` page shows that address.
-- Images and the database go in `data/`. Delete `data/` for a clean start. The database uses WAL mode, so `kakehashi.db` has two more files next to it while the server runs (`-wal`, `-shm`). To copy the database, stop the server first, or use `sqlite3 data/kakehashi.db ".backup copy.db"`.
+- Images and the database go in `data/`. Delete `data/` for a clean start. `KAKEHASHI_DATA=<folder>` uses another folder (for example for a demo). The database uses WAL mode, so `kakehashi.db` has two more files next to it while the server runs (`-wal`, `-shm`). To copy the database, stop the server first, or use `sqlite3 data/kakehashi.db ".backup copy.db"`.
 
 ## Files
 

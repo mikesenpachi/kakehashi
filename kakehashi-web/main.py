@@ -28,7 +28,7 @@ import translate
 # A game id: letters, digits and "-". It is also a folder name in IMAGES, so it can never be "..".
 GAME_ID = r"^[A-Za-z0-9-]{1,64}$"
 
-IMAGES = Path(__file__).parent / "data" / "images"
+IMAGES = db.DATA / "images"
 IMAGES.mkdir(parents=True, exist_ok=True)
 
 TOKEN = os.environ.get("KAKEHASHI_TOKEN")
