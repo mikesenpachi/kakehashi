@@ -207,10 +207,11 @@ def about() -> str:
 
 
 @app.get("/stats", response_class=HTMLResponse)
-def stats() -> str:
-    """Show the stats board: characters read per day, the streak, the translate rate and the games."""
+def stats(year: Annotated[int | None, Query(ge=2000, le=2999)] = None, page: Annotated[int, Query(ge=1)] = 1) -> str:
+    """Show the stats board: the heatmap of one year (default: this year), the streak, the translate rate,
+    and one page of the games table."""
     shots = db.list_shots()
-    return pages.page("Stats · kakehashi", shots, 0, board.board_view(shots, date.today()), "stats")
+    return pages.page("Stats · kakehashi", shots, 0, board.board_view(shots, date.today(), year, page), "stats")
 
 
 @app.get("/server", response_class=HTMLResponse)

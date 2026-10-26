@@ -12,7 +12,7 @@ from html import escape
 import pages
 
 JAPANESE = re.compile(r"[぀-ヿ㐀-䶿一-鿿々]")
-HEATMAP_WEEKS = (13, 53)  # the heatmap shows at least 13 weeks, at most 53
+GAMES_PER_PAGE = 10
 
 
 def characters(text: str | None) -> int:
@@ -96,17 +96,25 @@ def numbers(shots: list[sqlite3.Row], today: date) -> dict:
     }
 
 
-def board_view(shots: list[sqlite3.Row], today: date) -> str:
-    """Return the /stats page body: number tiles, the heatmap of characters per day, and the games table."""
+def board_view(shots: list[sqlite3.Row], today: date, year: int | None = None, page: int = 1) -> str:
+    """Return the /stats page body: number tiles, the heatmap of one year, and one page of the games table.
+
+    `year` is the heatmap year (default: this year). `page` is the games table page, from 1.
+    """
     if not shots:
         return '<div class="shot-head"><h1>Stats</h1></div><p class="none">No shots yet.</p>'
+    year = year or today.year
+    days = per_day(shots)
+    in_year = sum(count for day, count in days.items() if day.year == year)
     return (
         '<div class="shot-head"><h1>Stats</h1></div>'
         f"{tiles(numbers(shots, today))}"
-        '<div class="card board-card"><div class="text-head"><h2>Characters per day</h2></div>'
-        f"{heatmap(per_day(shots), today)}</div>"
+        f'<div class="card board-card"><div class="text-head"><h2>Characters per day</h2>'
+        f'<span class="hint">{in_year:,} in {year}</span>{year_links(years(days, today), year, page)}</div>'
+        f"{heatmap(days, today, year)}</div>"
         '<div class="card board-card"><div class="text-head"><h2>Games</h2></div>'
-        f"{games_table(games(shots))}</div>"
+        f"{games_table(games(shots), page, year)}</div>"
+        f"<script>{TOOLTIP}</script>"
     )
 
 
@@ -126,12 +134,18 @@ def tiles(values: dict) -> str:
     )
 
 
-def heatmap_start(days: dict[date, int], today: date) -> date:
-    """Return the Monday of the first heatmap week: the week of the first shot, within HEATMAP_WEEKS."""
-    least, most = HEATMAP_WEEKS
-    monday = today - timedelta(days=today.weekday())
-    weeks = (monday - min(days)).days // 7 + 1
-    return monday - timedelta(weeks=min(max(weeks, least), most) - 1)
+def years(days: dict[date, int], today: date) -> list[int]:
+    """Return the years with shots and this year, newest first."""
+    return sorted({day.year for day in days} | {today.year}, reverse=True)
+
+
+def year_links(choices: list[int], year: int, page: int) -> str:
+    """Return one link per year; the shown year is marked. The games page stays the same."""
+    links = "".join(
+        f'<a href="?year={choice}&amp;page={page}"{" class=active" if choice == year else ""}>{choice}</a>'
+        for choice in choices
+    )
+    return f'<nav class="years push" aria-label="Year">{links}</nav>'
 
 
 def level(count: int, most: int) -> int:
@@ -139,44 +153,80 @@ def level(count: int, most: int) -> int:
     return 0 if count == 0 else max(1, -(-4 * count // most))
 
 
-def heatmap(days: dict[date, int], today: date) -> str:
-    """Return one square per day, a column per week (Monday on top), darker for more characters.
+def heatmap(days: dict[date, int], today: date, year: int) -> str:
+    """Return one square per day of the year, a column per week (Monday on top), darker for more characters.
 
-    Each square has a tooltip with the date and the characters. A month name is above its first week.
+    Shades compare with the best day of that year. A month name is above the week of its 1st day.
+    Days outside the year are blank; days after today are outlines. The tooltip (TOOLTIP) reads data-day and data-count.
     """
-    start = heatmap_start(days, today)
-    most = max(days.values()) or 1
-    weeks = (today - start).days // 7 + 1
+    start = date(year, 1, 1) - timedelta(days=date(year, 1, 1).weekday())
+    weeks = (date(year, 12, 31) - start).days // 7 + 1
+    most = max((count for day, count in days.items() if day.year == year), default=0) or 1
     months, cells = [], []
     for week in range(weeks):
-        monday = start + timedelta(weeks=week)
-        new_month = week == 0 or monday.month != (monday - timedelta(weeks=1)).month
-        months.append(f"<span>{monday:%b}</span>" if new_month else "<span></span>")
-        for offset in range(7):
-            day = monday + timedelta(days=offset)
-            if day > today:
-                cells.append('<span class="future"></span>')
+        week_days = [start + timedelta(weeks=week, days=offset) for offset in range(7)]
+        first = next((day for day in week_days if day.day == 1 and day.year == year), None)
+        months.append(f"<span>{first:%b}</span>" if first else "<span></span>")
+        for day in week_days:
+            if day.year != year or day > today:
+                cells.append(f'<span class="{"blank" if day.year != year else "later"}"></span>')
                 continue
             count = days.get(day, 0)
-            tip = f"{day:%a %Y-%m-%d}: {count:,} characters"
-            cells.append(f'<span class="l{level(count, most)}" title="{tip}"></span>')
+            cells.append(f'<span class="l{level(count, most)}" data-day="{day:%Y-%m-%d}" data-count="{count:,}"></span>')
     legend = "".join(f'<span class="l{shade}"></span>' for shade in range(5))
     return (
-        f'<div class="heatmap" style="--weeks: {weeks}" role="img" aria-label="Characters read per day">'
+        f'<div class="heatmap" style="--weeks: {weeks}" role="img" aria-label="Characters read per day in {year}">'
         f'<div class="months">{"".join(months)}</div><div class="days">{"".join(cells)}</div></div>'
-        f'<div class="heat-legend">Less {legend} More</div>'
+        f'<div class="heat-legend">Less {legend} More</div><div id="heat-tip" class="heat-tip" hidden></div>'
     )
 
 
-def games_table(rows: list[dict]) -> str:
-    """Return the games table: one row per game, most characters first."""
+# Shows the date and the characters of the heatmap square under the pointer, at once, above the square.
+# Fixed position, so the scroll box of the heatmap does not cut it.
+TOOLTIP = """
+const tip = document.getElementById("heat-tip");
+const squares = document.querySelector(".heatmap .days");
+squares.addEventListener("mouseover", (event) => {
+  const day = event.target.dataset.day;
+  if (!day) { tip.hidden = true; return; }
+  tip.textContent = `${day}: ${event.target.dataset.count} characters`;
+  tip.hidden = false;
+  const square = event.target.getBoundingClientRect();
+  tip.style.left = `${square.left + square.width / 2 - tip.offsetWidth / 2}px`;
+  tip.style.top = `${square.top - tip.offsetHeight - 6}px`;
+});
+squares.addEventListener("mouseleave", () => (tip.hidden = true));
+"""
+
+
+def games_table(rows: list[dict], page: int, year: int) -> str:
+    """Return one page of the games table (GAMES_PER_PAGE rows, most characters first), with page links."""
+    pages_count = max(1, -(-len(rows) // GAMES_PER_PAGE))
+    page = min(max(page, 1), pages_count)
+    first = (page - 1) * GAMES_PER_PAGE
+    shown = rows[first : first + GAMES_PER_PAGE]
     body = "".join(
         f'<tr><td>{escape(row["name"])}<span class="platform">{row["platform"]}</span></td>'
         f'<td>{row["characters"]:,}</td><td>{row["shots"]:,}</td><td>{len(row["days"])}</td>'
         f'<td>{row["first"]:%Y-%m-%d}</td><td>{row["last"]:%Y-%m-%d}</td><td>{row["translate_rate"]:.0%}</td></tr>'
-        for row in rows
+        for row in shown
     )
     return (
         '<div class="table-wrap"><table class="games-table"><thead><tr><th>Game</th><th>Characters</th><th>Shots</th>'
         f"<th>Days</th><th>First</th><th>Last</th><th>Translated</th></tr></thead><tbody>{body}</tbody></table></div>"
+        f"{pager(page, pages_count, first + 1, first + len(shown), len(rows), year)}"
     )
+
+
+def pager(page: int, pages_count: int, first: int, last: int, total: int, year: int) -> str:
+    """Return "1-10 of 23 games" with Previous and Next links, or only the count when all fit on one page."""
+    count = f'<span class="hint">{first}-{last} of {total} games</span>'
+    if pages_count == 1:
+        return f'<div class="pager">{count}</div>'
+
+    def link(target: int, text: str) -> str:
+        if 1 <= target <= pages_count:
+            return f'<a href="?year={year}&amp;page={target}">{text}</a>'
+        return f'<span class="off">{text}</span>'
+
+    return f'<div class="pager">{count}{link(page - 1, "Previous")}{link(page + 1, "Next")}</div>'
