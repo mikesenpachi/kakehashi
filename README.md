@@ -47,7 +47,7 @@ The token is optional, but set one on a shared network. Without it, anyone who c
 
 - Each screenshot is sent to Google Lens for OCR.
 - **Translate** sends the text to Google Translate.
-- Shots, texts and translations stay on your computer, in `kakehashi-web/data/`.
+- Shots, texts and translations stay on your computer, in `kakehashi-web/data/`. `make backup BACKUP_DIR=<folder on another disk>` backs them up (see the webapp README).
 
 ## Disclaimers
 
@@ -69,6 +69,8 @@ From the repo root:
 | `make plugin-3ds` | Build the 3DS plugin in Docker |
 | `make zip-3ds` | Build the 3DS plugin and zip it for the SD card (`release/kakehashi-3ds.zip`) |
 | `make demo` | Start a demo server on port 8767 with empty data; then `uv run tools/demo.py` sends demo screens (public domain text, no real game) |
+| `make backup` | Back up the database and the new images to `BACKUP_DIR` (default `~/kakehashi-backups`); adds only, then checks the copy |
+| `make restore` | Stop the server first. Restore the newest copy in `BACKUP_DIR` (or `DB=<file>`); the current data is moved aside, not deleted |
 | `make help` | List all targets |
 
 GitHub Actions runs the tests on Linux, macOS and Windows for each push to `main` and each pull request (`.github/workflows/test.yml`).

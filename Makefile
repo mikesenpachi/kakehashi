@@ -4,8 +4,9 @@ VITASDK ?= $(HOME)/vitasdk
 export VITASDK
 export PATH := $(VITASDK)/bin:$(PATH)
 SERVER ?= http://localhost:8766
+BACKUP_DIR ?= $(HOME)/kakehashi-backups
 
-.PHONY: help server plugins capture sender plugin-3ds image-3ds zip-3ds zip-vita demo samples test prune
+.PHONY: help server plugins capture sender plugin-3ds image-3ds zip-3ds zip-vita demo samples test prune backup restore
 
 help:
 	@echo "make server    start the webapp on port 8766 (reloads on .py changes)"
@@ -17,6 +18,8 @@ help:
 	@echo "make samples   upload your shots in samples/ to SERVER (default $(SERVER)); adds them to its database"
 	@echo "make test      run the webapp unit tests (temporary data, fake OCR)"
 	@echo "make prune     list image files that no shot uses (deletes nothing; see the tool for --delete)"
+	@echo "make backup    back up the database and new images to BACKUP_DIR (default $(BACKUP_DIR))"
+	@echo "make restore   stop the server first; restore the newest copy in BACKUP_DIR (or DB=<file>); moves the current data aside"
 
 server:
 	cd kakehashi-web && uv run uvicorn main:app --host 0.0.0.0 --port 8766 --reload
@@ -63,3 +66,11 @@ test:
 
 prune:
 	uv run tools/prune_images.py
+
+# Adds only: a dated database copy and the new image files. Never deletes in BACKUP_DIR.
+backup:
+	uv run tools/backup.py "$(BACKUP_DIR)"
+
+# Refuses while the server runs. Renames the current data folder, never deletes it.
+restore:
+	uv run tools/restore.py "$(BACKUP_DIR)" $(if $(DB),"$(DB)")
