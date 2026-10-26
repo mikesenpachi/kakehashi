@@ -3,7 +3,7 @@
 // The outline shows the box that this shot's text came from.
 // Hide box is per game: the choice is kept in this browser (localStorage), so every shot of the game opens the same way.
 // Enlarge shows the image in a full-window viewer.
-// Also saves manual edits of the text, translates the text, renames the game,
+// Also saves manual edits of the text and of the translation, translates the text, renames the game,
 // and copies the text, the translation or the image to the clipboard.
 // A box is [left, top, right, bottom] as fractions of the image, 0 to 1.
 
@@ -20,6 +20,7 @@ const toggleButton = document.getElementById("toggle");
 const translateButton = document.getElementById("translate");
 const translation = document.getElementById("translation");
 const copyTranslationButton = document.getElementById("copy-translation");
+const editTranslationButton = document.getElementById("edit-translation");
 const renameButton = document.getElementById("rename");
 const copyButton = document.getElementById("copy");
 const copyTextButton = document.getElementById("copy-text");
@@ -160,6 +161,21 @@ translateButton.addEventListener("click", async () => {
   });
   const answer = await response.json();
   translation.textContent = response.ok ? answer.translation : `Cannot translate: ${answer.detail}`;
+});
+
+// Edit translation: the first click makes the translation editable, the second click saves it.
+// An empty translation is saved as empty. A new "Translate" click replaces the edit.
+editTranslationButton.addEventListener("click", async () => {
+  if (!translation.isContentEditable) {
+    translation.contentEditable = "true";
+    translation.focus();
+    editTranslationButton.textContent = "Save translation";
+    return;
+  }
+  const answer = await send("POST", `/shot/${shotId}/translation`, { translation: translation.innerText });
+  translation.contentEditable = "false";
+  translation.textContent = answer.translation;
+  editTranslationButton.textContent = "Edit translation";
 });
 
 // Shows a check sign on the button for 1.5 s. No message, so the image does not move.

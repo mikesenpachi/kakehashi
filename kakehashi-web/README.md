@@ -13,7 +13,7 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8766
 
 The first run installs the dependencies. Stop the server with Ctrl+C.
 
-To require a token, start the server with `KAKEHASHI_TOKEN=<token>`. Then each shot needs the token, and so does each change from another device (edit, delete, clear, box, rename, translate). Changes from this computer itself (`http://localhost:8766`) need no token, so the page works there. On another device the page shows the shots, and a change shows "Not done". Without a token, anyone who can reach the port can change or delete shots: set one on a shared network.
+To require a token, start the server with `KAKEHASHI_TOKEN=<token>`. Then each shot needs the token, and so does each change from another device (edit, delete, clear, box, rename, translate, edit translation). Changes from this computer itself (`http://localhost:8766`) need no token, so the page works there. On another device the page shows the shots, and a change shows "Not done". Without a token, anyone who can reach the port can change or delete shots: set one on a shared network.
 
 - Open http://localhost:8766/ for the home page: the newest shot, the recent shots of all games, and the numbers. "Shots" in the top bar opens the newest shot. The left sidebar shows the shots of the current game by day; the right sidebar shows the games per platform.
 - `--host 0.0.0.0` lets other devices on your Wi-Fi reach the server. The console sends to `http://<computer IP>:8766`. The `/server` page shows that address.
@@ -104,6 +104,7 @@ On the shot page, the header shows the game name, the shot number in its game an
 - **Hide box** / **Show box**: hides or shows the green outlines on all shots of the game. The choice is kept in this browser (localStorage), not in the database.
 - **Rename** (next to the game name): sets the name that the sidebar and the shot page show instead of the game ID. `PUT /games/<game>/name` with `{"name"}`.
 - **Translate**: shows the English translation (Google Translate) in the Translation card under the text, and saves it with the shot. The card is always shown; before the first translation it says "Not translated yet. Click Translate." A new click translates again and replaces the saved translation; an edit of the text does not change it. Edit the text first if the OCR is wrong. `POST /shot/<id>/translate` with `{"text"}` returns `{"translation"}`. **Copy translation** copies it.
+- **Edit translation**: makes the translation editable; the button becomes **Save translation**, and a click saves it (`POST /shot/<id>/translation` with `{"translation"}`; empty clears it). A new **Translate** click replaces the edit.
 - **Copy text** and **Copy image** (top right): copy the text, or the shot as PNG at full size, to the clipboard. The button shows a check sign when done. Browsers allow this only on `http://localhost:8766`; on the network address the page says so.
 
 ## OCR

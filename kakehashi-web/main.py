@@ -2,7 +2,7 @@
 
 Run: uv run uvicorn main:app --host 0.0.0.0 --port 8766
 Set KAKEHASHI_TOKEN to require that token in the X-Token header of each shot,
-and of each change (edit, delete, box, rename, translate) that does not come from this computer.
+and of each change (edit, delete, box, rename, translate, edit translation) that does not come from this computer.
 """
 
 import hashlib
@@ -66,6 +66,12 @@ class TextIn(BaseModel):
 
     text: str
     box: db.Box | None = None
+
+
+class TranslationIn(BaseModel):
+    """A translation as the user typed it. Empty clears it."""
+
+    translation: Annotated[str, StringConstraints(strip_whitespace=True, max_length=5000)]
 
 
 class NameIn(BaseModel):
@@ -252,6 +258,13 @@ def translate_shot(shot_id: int, body: TranslateIn) -> dict:
         raise HTTPException(502, f"Google Translate did not answer: {error}")
     db.set_translation(shot["id"], translation)
     return {"translation": translation}
+
+
+@app.post("/shot/{shot_id}/translation", dependencies=LOCAL_OR_TOKEN)
+def save_translation(shot_id: int, body: TranslationIn) -> dict:
+    """Save a manual edit of the translation. A new "Translate" click replaces it."""
+    db.set_translation(find_shot(shot_id)["id"], body.translation)
+    return {"translation": body.translation}
 
 
 @app.put("/games/{game}/name", dependencies=LOCAL_OR_TOKEN)

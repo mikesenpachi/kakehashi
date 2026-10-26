@@ -275,6 +275,7 @@ button.danger:hover { background: var(--danger-soft); }
 #text:hover { background: var(--surface-2); }
 #text:focus { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); }
 #translation { font-size: 18px; line-height: 1.6; white-space: pre-line; }
+#translation[contenteditable="true"] { padding: 6px 8px; margin: 0 -8px; border-radius: 6px; outline: none; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); }
 
 /* Home page: newest shot, recent shots of all games, numbers */
 
@@ -305,7 +306,7 @@ button.danger:hover { background: var(--danger-soft); }
 .result-head { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .result-text { font: 17px/1.6 var(--font-ja); }
 .result-translation { color: var(--muted); }
-#translation:empty::before { content: "Not translated yet. Click Translate."; color: var(--muted); }
+#translation:not([contenteditable="true"]):empty::before { content: "Not translated yet. Click Translate."; color: var(--muted); }
 mark { border-radius: 3px; padding: 0 1px; background: var(--accent-soft); color: var(--accent); }
 
 /* Empty home page */

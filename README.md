@@ -12,7 +12,7 @@ Press a button combo while you play on a PS Vita (also PSP and PS1 games in Adre
 - **OCR:** Google Lens reads the text. Furigana is removed. When Lens fails, the console keeps the shot and sends it again later.
 - **Crop box per game:** draw a box around the dialogue once, and new shots of that game read only the box.
 - **Read and look up:** the text shows next to the shot, ready for Yomitan. You can edit the text.
-- **Translate:** one click shows an English translation (Google Translate) and saves it with the shot.
+- **Translate:** one click shows an English translation (Google Translate) and saves it with the shot. You can edit the translation.
 - **Search:** find any Japanese or English text in all your shots.
 - **Live:** new shots show up in the open page within a few seconds.
 
