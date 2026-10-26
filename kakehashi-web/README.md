@@ -25,6 +25,7 @@ To require a token, start the server with `KAKEHASHI_TOKEN=<token>`. Then each s
 |---|---|
 | `main.py` | Web routes |
 | `pages.py` | HTML: page layout, shots and games sidebars, shot view |
+| `board.py` | Stats board: reading numbers and the `/stats` page |
 | `static/style.css` | Page styles; dark mode follows the system setting |
 | `static/box.js` | Shot page: crop box, text edits, translate, copy, rename, delete |
 | `ocr.py` | OCR with Google Lens, text cleanup |
@@ -65,6 +66,8 @@ curl -H "X-Token: abc123" --data-binary @shot.jpg "localhost:8766/shot?game=PCSG
 `GET /` shows the home page. `GET /latest` redirects to the newest shot (to `/` when there are no shots). `GET /shot/<id>` shows one shot: the image on top, in a box of fixed height (so the text always starts at the same place), then the editable OCR text and the translation. **Enlarge** shows the image as large as the window allows (a click or Esc closes it). Both pages have the two sidebars.
 
 The search box in the top bar (on every page) opens `GET /search?q=<text>`; the **Search** link in the top bar opens the empty search page. It shows the newest 100 shots whose text or translation contains the text, in all games, with the text marked. It finds exact text, as Ctrl+F does: Japanese or English, any letter case. `まほう` does not find `魔法`, and `行く` does not find `行こう`. 3 or more characters use the trigram index (SQLite FTS5); 1 or 2 characters read all rows.
+
+`GET /stats` (top bar link **Stats**) shows the stats board: Japanese characters (kana and kanji) read today, in the last 7 days and in total, the streak of days in a row with shots, the share of shots translated, a heatmap of characters per day (13 to 53 weeks, a tooltip per day), and a table per game (characters, shots, days played, first and last day, translated). A day is the date of the capture time.
 
 `GET /about` shows what kakehashi is, how a shot travels, the OCR engines, and the numbers of shots, games and image bytes on disk.
 

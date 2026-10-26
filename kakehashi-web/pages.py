@@ -71,7 +71,7 @@ def page(title: str, shots: list[sqlite3.Row], current: int, body: str, active: 
     links = "".join(
         f'<a href="{href}"{" class=active" if key == active else ""}>{name}</a>'
         for key, href, name in (
-            ("home", "/", "Home"), ("shots", "/latest", "Shots"), ("search", "/search", "Search"),
+            ("home", "/", "Home"), ("shots", "/latest", "Shots"), ("search", "/search", "Search"), ("stats", "/stats", "Stats"),
             ("server", "/server", "Server"), ("about", "/about", "About"),
         )
     )

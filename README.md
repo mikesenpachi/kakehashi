@@ -14,6 +14,7 @@ Press a button combo while you play on a PS Vita (also PSP and PS1 games in Adre
 - **Read and look up:** the text shows next to the shot, ready for Yomitan. You can edit the text.
 - **Translate:** one click shows an English translation (Google Translate) and saves it with the shot. You can edit the translation.
 - **Search:** find any Japanese or English text in all your shots.
+- **Stats:** characters read per day, your streak, and numbers per game.
 - **Live:** new shots show up in the open page within a few seconds.
 
 ## Requirements

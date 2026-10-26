@@ -9,7 +9,7 @@ import hashlib
 import io
 import os
 import socket
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -20,6 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, StringConstraints
 
+import board
 import db
 import ocr
 import pages
@@ -203,6 +204,13 @@ def about() -> str:
     """Show what kakehashi is, how it works, and the numbers of shots, games and image bytes."""
     shots = db.list_shots()
     return pages.page("About · kakehashi", shots, 0, pages.about_view(shots, image_bytes()), "about")
+
+
+@app.get("/stats", response_class=HTMLResponse)
+def stats() -> str:
+    """Show the stats board: characters read per day, the streak, the translate rate and the games."""
+    shots = db.list_shots()
+    return pages.page("Stats · kakehashi", shots, 0, board.board_view(shots, date.today()), "stats")
 
 
 @app.get("/server", response_class=HTMLResponse)
