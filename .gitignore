@@ -2,6 +2,7 @@
 .venv/
 __pycache__/
 kakehashi-web/data/
+kakehashi-web/data.before-restore-*/
 kakehashi-vita/*/build/
 kakehashi-3ds/build/
 kakehashi-3ds/*.elf
