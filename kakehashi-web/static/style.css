@@ -171,7 +171,8 @@ aside nav details ul { margin: 0 0 6px 16px; }
 /* Main area */
 
 main { grid-area: main; overflow-y: auto; padding: 24px 32px 48px; }
-.content { max-width: 1000px; display: flex; flex-direction: column; gap: 16px; }
+.content { max-width: 1000px; margin-inline: auto; display: flex; flex-direction: column; gap: 16px; }
+.content:has(> .info) { max-width: 760px; }
 
 .shot-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .shot-head h1 { margin: 0; font-size: 22px; font-weight: 650; }
@@ -275,6 +276,7 @@ button.danger:hover { background: var(--danger-soft); }
 #text:hover { background: var(--surface-2); }
 #text:focus { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); }
 #translation { font-size: 18px; line-height: 1.6; white-space: pre-line; }
+#translation[contenteditable="true"] { padding: 6px 8px; margin: 0 -8px; border-radius: 6px; outline: none; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); }
 
 /* Home page: newest shot, recent shots of all games, numbers */
 
@@ -305,7 +307,7 @@ button.danger:hover { background: var(--danger-soft); }
 .result-head { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .result-text { font: 17px/1.6 var(--font-ja); }
 .result-translation { color: var(--muted); }
-#translation:empty::before { content: "Not translated yet. Click Translate."; color: var(--muted); }
+#translation:not([contenteditable="true"]):empty::before { content: "Not translated yet. Click Translate."; color: var(--muted); }
 mark { border-radius: 3px; padding: 0 1px; background: var(--accent-soft); color: var(--accent); }
 
 /* Empty home page */
@@ -358,3 +360,40 @@ pre { margin: 8px 0 0; padding: 12px 14px; border: 1px solid var(--border); bord
 .stats div { flex: 1; min-width: 140px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; }
 .stats b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
 .stats span { color: var(--muted); font-size: 12px; }
+
+/* Stats board: heatmap of characters per day (one hue, light to dark) and the games table */
+
+.board-card { padding: 16px 20px 20px; }
+.heatmap { overflow-x: auto; padding-bottom: 4px; }
+.heatmap .months, .heatmap .days { display: grid; grid-template-columns: repeat(var(--weeks), minmax(10px, 1fr)); gap: 3px; }
+.heatmap .months { margin-bottom: 4px; color: var(--muted); font-size: 11px; }
+.heatmap .months span { white-space: nowrap; overflow: visible; }
+.heatmap .days { grid-template-rows: repeat(7, auto); grid-auto-flow: column; }
+.heatmap .days span { aspect-ratio: 1; border-radius: 3px; }
+.heat-legend span { border-radius: 3px; }
+.heat-legend { display: flex; align-items: center; justify-content: flex-end; gap: 3px; margin-top: 8px; color: var(--muted); font-size: 11px; }
+.heat-legend span { display: inline-block; width: 13px; height: 13px; }
+.l0 { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); }
+.l1 { background: color-mix(in srgb, var(--accent) 25%, var(--surface)); }
+.l2 { background: color-mix(in srgb, var(--accent) 50%, var(--surface)); }
+.l3 { background: color-mix(in srgb, var(--accent) 75%, var(--surface)); }
+.l4 { background: var(--accent); }
+.heatmap .days span.blank { background: none; box-shadow: none; }
+.heatmap .days span.later { background: none; box-shadow: inset 0 0 0 1px var(--border); }
+.heatmap .days span[data-day]:hover { outline: 2px solid var(--text); outline-offset: 1px; }
+.heat-tip { position: fixed; z-index: 10; padding: 4px 8px; border-radius: 6px; background: var(--text); color: var(--bg); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
+.years { display: flex; gap: 4px; }
+.years a { padding: 2px 9px; border-radius: 6px; color: var(--muted); font-size: 12px; text-decoration: none; font-variant-numeric: tabular-nums; }
+.years a:hover { background: var(--surface-2); color: var(--text); }
+.years a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.pager { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-size: 13px; }
+.pager .hint { margin-right: auto; }
+.pager a { color: var(--accent); text-decoration: none; }
+.pager .off { color: var(--muted); opacity: 0.5; }
+.table-wrap { overflow-x: auto; }
+.games-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.games-table th { padding: 6px 10px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 600; text-align: right; }
+.games-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
+.games-table th:first-child, .games-table td:first-child { text-align: left; white-space: normal; }
+.games-table tr:last-child td { border-bottom: 0; }
+.games-table .platform { display: block; color: var(--muted); font-size: 11px; }

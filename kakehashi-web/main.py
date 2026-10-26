@@ -2,14 +2,14 @@
 
 Run: uv run uvicorn main:app --host 0.0.0.0 --port 8766
 Set KAKEHASHI_TOKEN to require that token in the X-Token header of each shot,
-and of each change (edit, delete, box, rename, translate) that does not come from this computer.
+and of each change (edit, delete, box, rename, translate, edit translation) that does not come from this computer.
 """
 
 import hashlib
 import io
 import os
 import socket
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -20,6 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, StringConstraints
 
+import board
 import db
 import ocr
 import pages
@@ -28,7 +29,7 @@ import translate
 # A game id: letters, digits and "-". It is also a folder name in IMAGES, so it can never be "..".
 GAME_ID = r"^[A-Za-z0-9-]{1,64}$"
 
-IMAGES = Path(__file__).parent / "data" / "images"
+IMAGES = db.DATA / "images"
 IMAGES.mkdir(parents=True, exist_ok=True)
 
 TOKEN = os.environ.get("KAKEHASHI_TOKEN")
@@ -66,6 +67,12 @@ class TextIn(BaseModel):
 
     text: str
     box: db.Box | None = None
+
+
+class TranslationIn(BaseModel):
+    """A translation as the user typed it. Empty clears it."""
+
+    translation: Annotated[str, StringConstraints(strip_whitespace=True, max_length=5000)]
 
 
 class NameIn(BaseModel):
@@ -199,6 +206,14 @@ def about() -> str:
     return pages.page("About · kakehashi", shots, 0, pages.about_view(shots, image_bytes()), "about")
 
 
+@app.get("/stats", response_class=HTMLResponse)
+def stats(year: Annotated[int | None, Query(ge=2000, le=2999)] = None, page: Annotated[int, Query(ge=1)] = 1) -> str:
+    """Show the stats board: the heatmap of one year (default: this year), the streak, the translate rate,
+    and one page of the games table."""
+    shots = db.list_shots()
+    return pages.page("Stats · kakehashi", shots, 0, board.board_view(shots, date.today(), year, page), "stats")
+
+
 @app.get("/server", response_class=HTMLResponse)
 def server(request: Request) -> str:
     """Show the address of this webapp on the local network, for the device configs."""
@@ -252,6 +267,13 @@ def translate_shot(shot_id: int, body: TranslateIn) -> dict:
         raise HTTPException(502, f"Google Translate did not answer: {error}")
     db.set_translation(shot["id"], translation)
     return {"translation": translation}
+
+
+@app.post("/shot/{shot_id}/translation", dependencies=LOCAL_OR_TOKEN)
+def save_translation(shot_id: int, body: TranslationIn) -> dict:
+    """Save a manual edit of the translation. A new "Translate" click replaces it."""
+    db.set_translation(find_shot(shot_id)["id"], body.translation)
+    return {"translation": body.translation}
 
 
 @app.put("/games/{game}/name", dependencies=LOCAL_OR_TOKEN)

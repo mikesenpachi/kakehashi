@@ -5,7 +5,7 @@ export VITASDK
 export PATH := $(VITASDK)/bin:$(PATH)
 SERVER ?= http://localhost:8766
 
-.PHONY: help server plugins capture sender plugin-3ds image-3ds zip-3ds zip-vita samples test prune
+.PHONY: help server plugins capture sender plugin-3ds image-3ds zip-3ds zip-vita demo samples test prune
 
 help:
 	@echo "make server    start the webapp on port 8766 (reloads on .py changes)"
@@ -13,6 +13,7 @@ help:
 	@echo "make zip-vita  build the Vita plugins and zip them (release/kakehashi-vita.zip)"
 	@echo "make plugin-3ds build the 3DS plugin in Docker (kakehashi-3ds/kakehashi.3gx)"
 	@echo "make zip-3ds   build the 3DS plugin and zip it for the SD card (release/kakehashi-3ds.zip)"
+	@echo "make demo      start a demo server on port 8767 with empty data (then: uv run tools/demo.py)"
 	@echo "make samples   upload your shots in samples/ to SERVER (default $(SERVER)); adds them to its database"
 	@echo "make test      run the webapp unit tests (temporary data, fake OCR)"
 	@echo "make prune     list image files that no shot uses (deletes nothing; see the tool for --delete)"
@@ -48,6 +49,11 @@ zip-3ds: plugin-3ds
 	cp kakehashi-3ds/kakehashi.3gx release/sd-3ds/luma/plugins/default.3gx
 	cp kakehashi-3ds/config.example.txt release/sd-3ds/kakehashi/config.example.txt
 	cd release/sd-3ds && zip -r -X ../kakehashi-3ds.zip luma kakehashi
+
+# A demo server for recordings: its own empty data folder, so real shots never show.
+demo:
+	rm -rf $(CURDIR)/kakehashi-web/demo-data
+	cd kakehashi-web && KAKEHASHI_DATA=$(CURDIR)/kakehashi-web/demo-data uv run uvicorn main:app --port 8767
 
 samples:
 	uv run tools/upload_samples.py $(SERVER)

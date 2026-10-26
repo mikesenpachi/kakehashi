@@ -50,15 +50,26 @@ async def lens_read(image: Image.Image) -> dict:
 
 
 def clean_lens(words: list[dict]) -> str:
-    """Join the Lens words into one string without furigana.
+    """Join the Lens words into one string without furigana and without repeats.
 
     Furigana words are much shorter than the main text, so words below
     60% of the tallest word height are dropped.
+    Lens sometimes returns a part of a line twice at the same place, the extra copy first,
+    so a word is dropped when a later word has the same text at the same place.
     """
+    words = [word for i, word in enumerate(words) if not any(repeats(word, later) for later in words[i + 1 :])]
     if not words:
         return ""
     tallest = max(word["geometry"]["height"] for word in words)
     return clean("".join(word["word"] for word in words if word["geometry"]["height"] >= 0.6 * tallest))
+
+
+def repeats(word: dict, later: dict) -> bool:
+    """True if later has the same text as word, and its center is inside word's box."""
+    if word["word"] != later["word"]:
+        return False
+    a, b = word["geometry"], later["geometry"]
+    return abs(a["center_x"] - b["center_x"]) < a["width"] / 2 and abs(a["center_y"] - b["center_y"]) < a["height"] / 2
 
 
 def clean(text: str) -> str:

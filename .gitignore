@@ -15,3 +15,7 @@ samples/
 
 # Prebuilt plugins for a GitHub release
 release/
+
+# Font for tools/demo.py (downloaded on first use)
+tools/fonts/
+kakehashi-web/demo-data/

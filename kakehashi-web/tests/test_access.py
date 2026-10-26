@@ -13,6 +13,7 @@ CHANGES = [
     ("POST", "/shot/1/test", {"box": [0.1, 0.1, 0.9, 0.9]}),
     ("POST", "/shot/1/text", {"text": "ペルソナ"}),
     ("POST", "/shot/1/translate", {"text": "ペルソナ"}),
+    ("POST", "/shot/1/translation", {"translation": "Persona"}),
     ("PUT", "/games/PCSG00563/name", {"name": "P4G"}),
     ("PUT", "/games/PCSG00563/box", {"box": [0.1, 0.1, 0.9, 0.9]}),
     ("DELETE", "/games/PCSG00563/box", None),

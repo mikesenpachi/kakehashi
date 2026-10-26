@@ -1,6 +1,9 @@
 """Tests for POST /shot, the one contract for all devices."""
 
 import hashlib
+import os
+import subprocess
+import sys
 
 import db
 import main
@@ -158,3 +161,11 @@ def test_lens_failure_on_test_box_is_502(client, monkeypatch):
     fail_ocr(monkeypatch)
     reply = client.post(f"/shot/{shot_id}/test", json={"box": [0.1, 0.1, 0.9, 0.9]})
     assert reply.status_code == 502
+
+
+def test_kakehashi_data_sets_the_data_folder(tmp_path):
+    code = "import db, main; print(db.DB); print(main.IMAGES)"
+    env = {**os.environ, "KAKEHASHI_DATA": str(tmp_path)}
+    out = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True, check=True).stdout
+    assert out.split() == [str(tmp_path / "kakehashi.db"), str(tmp_path / "images")]
+    assert (tmp_path / "images").is_dir()

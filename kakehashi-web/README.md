@@ -13,11 +13,11 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8766
 
 The first run installs the dependencies. Stop the server with Ctrl+C.
 
-To require a token, start the server with `KAKEHASHI_TOKEN=<token>`. Then each shot needs the token, and so does each change from another device (edit, delete, clear, box, rename, translate). Changes from this computer itself (`http://localhost:8766`) need no token, so the page works there. On another device the page shows the shots, and a change shows "Not done". Without a token, anyone who can reach the port can change or delete shots: set one on a shared network.
+To require a token, start the server with `KAKEHASHI_TOKEN=<token>`. Then each shot needs the token, and so does each change from another device (edit, delete, clear, box, rename, translate, edit translation). Changes from this computer itself (`http://localhost:8766`) need no token, so the page works there. On another device the page shows the shots, and a change shows "Not done". Without a token, anyone who can reach the port can change or delete shots: set one on a shared network.
 
 - Open http://localhost:8766/ for the home page: the newest shot, the recent shots of all games, and the numbers. "Shots" in the top bar opens the newest shot. The left sidebar shows the shots of the current game by day; the right sidebar shows the games per platform.
 - `--host 0.0.0.0` lets other devices on your Wi-Fi reach the server. The console sends to `http://<computer IP>:8766`. The `/server` page shows that address.
-- Images and the database go in `data/`. Delete `data/` for a clean start. The database uses WAL mode, so `kakehashi.db` has two more files next to it while the server runs (`-wal`, `-shm`). To copy the database, stop the server first, or use `sqlite3 data/kakehashi.db ".backup copy.db"`.
+- Images and the database go in `data/`. Delete `data/` for a clean start. `KAKEHASHI_DATA=<folder>` uses another folder (for example for a demo). The database uses WAL mode, so `kakehashi.db` has two more files next to it while the server runs (`-wal`, `-shm`). To copy the database, stop the server first, or use `sqlite3 data/kakehashi.db ".backup copy.db"`.
 
 ## Files
 
@@ -25,6 +25,7 @@ To require a token, start the server with `KAKEHASHI_TOKEN=<token>`. Then each s
 |---|---|
 | `main.py` | Web routes |
 | `pages.py` | HTML: page layout, shots and games sidebars, shot view |
+| `board.py` | Stats board: reading numbers and the `/stats` page |
 | `static/style.css` | Page styles; dark mode follows the system setting |
 | `static/box.js` | Shot page: crop box, text edits, translate, copy, rename, delete |
 | `ocr.py` | OCR with Google Lens, text cleanup |
@@ -66,6 +67,8 @@ curl -H "X-Token: abc123" --data-binary @shot.jpg "localhost:8766/shot?game=PCSG
 
 The search box in the top bar (on every page) opens `GET /search?q=<text>`; the **Search** link in the top bar opens the empty search page. It shows the newest 100 shots whose text or translation contains the text, in all games, with the text marked. It finds exact text, as Ctrl+F does: Japanese or English, any letter case. `まほう` does not find `魔法`, and `行く` does not find `行こう`. 3 or more characters use the trigram index (SQLite FTS5); 1 or 2 characters read all rows.
 
+`GET /stats` (top bar link **Stats**) shows the stats board: Japanese characters (kana and kanji) read today, in the last 7 days and in total, the streak of days in a row with shots, the share of shots translated, a heatmap of characters per day for one calendar year (`?year=2026`, default this year; one link per year with shots; point at a day to see `YYYY-MM-DD: N characters`), and a table per game, 10 games per page (`?page=2`; characters, shots, days played, first and last day, translated). A day is the date of the capture time.
+
 `GET /about` shows what kakehashi is, how a shot travels, the OCR engines, and the numbers of shots, games and image bytes on disk.
 
 `GET /server` shows the address of this computer on the local network and the port (for example `http://192.168.1.10:8766`), a ready `config.txt` block for the Vita, whether the token check is on (never the token itself), and the Shot API URL. The top bar links to both pages.
@@ -104,12 +107,13 @@ On the shot page, the header shows the game name, the shot number in its game an
 - **Hide box** / **Show box**: hides or shows the green outlines on all shots of the game. The choice is kept in this browser (localStorage), not in the database.
 - **Rename** (next to the game name): sets the name that the sidebar and the shot page show instead of the game ID. `PUT /games/<game>/name` with `{"name"}`.
 - **Translate**: shows the English translation (Google Translate) in the Translation card under the text, and saves it with the shot. The card is always shown; before the first translation it says "Not translated yet. Click Translate." A new click translates again and replaces the saved translation; an edit of the text does not change it. Edit the text first if the OCR is wrong. `POST /shot/<id>/translate` with `{"text"}` returns `{"translation"}`. **Copy translation** copies it.
+- **Edit translation**: makes the translation editable; the button becomes **Save translation**, and a click saves it (`POST /shot/<id>/translation` with `{"translation"}`; empty clears it). A new **Translate** click replaces the edit.
 - **Copy text** and **Copy image** (top right): copy the text, or the shot as PNG at full size, to the clipboard. The button shows a check sign when done. Browsers allow this only on `http://localhost:8766`; on the network address the page says so.
 
 ## OCR
 
 Google Lens (unofficial API) reads the crop box of the game, or the full screen when there is no box. If Lens fails, `POST /shot` answers 502 and saves nothing; the console keeps the shot in its queue and sends it again later. **Test** and **Use for this shot** show the error. The webapp makes one Lens call at a time: when two reads come together (a shot from the Vita and a **Test** click, or two devices), the second waits. Run one uvicorn worker (the default), because the lock is per process.
-Cleanup drops furigana (words shorter than 60% of the tallest word), removes `▼ > ＞` and spaces, and changes `･･･` to `…`.
+Cleanup drops furigana (words shorter than 60% of the tallest word), drops a word that Lens returns twice at the same place, removes `▼ > ＞` and spaces, and changes `･･･` to `…`.
 The raw OCR output is also saved.
 
 Without a box, speaker names and menus get into the text.

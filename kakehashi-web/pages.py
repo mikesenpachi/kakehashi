@@ -71,7 +71,7 @@ def page(title: str, shots: list[sqlite3.Row], current: int, body: str, active: 
     links = "".join(
         f'<a href="{href}"{" class=active" if key == active else ""}>{name}</a>'
         for key, href, name in (
-            ("home", "/", "Home"), ("shots", "/latest", "Shots"), ("search", "/search", "Search"),
+            ("home", "/", "Home"), ("shots", "/latest", "Shots"), ("search", "/search", "Search"), ("stats", "/stats", "Stats"),
             ("server", "/server", "Server"), ("about", "/about", "About"),
         )
     )
@@ -341,7 +341,7 @@ def shot_view(shot: sqlite3.Row, game_box: tuple | None, number: int, size: tupl
     "Rename game" sets the game name. "Delete shot" deletes this shot and its image file. "Delete game" deletes the game: all `count` shots, their image files, its name and its box.
     The outline shows the box that this shot's text came from,
     and "Hide box" hides it. "Clear box" shows when the game has a box.
-    static/box.js draws, tests and saves a new box, copies the text, translates it (Translation card, always shown; a hint while the shot has no translation), and copies the image.
+    static/box.js draws, tests and saves a new box, copies the text, translates it (Translation card, always shown; a hint while the shot has no translation), edits the translation, and copies the image.
     """
     src = f"/images/{escape(shot['game'])}/{escape(shot['name'])}"
     own = db.used_box(shot)
@@ -375,7 +375,8 @@ def shot_view(shot: sqlite3.Row, game_box: tuple | None, number: int, size: tupl
         '<button id="translate" class="push">Translate</button></div>'
         f'<div id="text" lang="ja" contenteditable spellcheck="false">{escape(shot["text"])}</div></div>'
         '<div id="translation-card" class="card text-card"><div class="text-head"><h2>Translation</h2>'
-        '<button id="copy-translation" class="push">Copy translation</button></div>'
+        '<button id="edit-translation" class="push">Edit translation</button>'
+        '<button id="copy-translation">Copy translation</button></div>'
         f'<div id="translation" lang="en">{escape(shot["translation"] or "")}</div></div>'
         f'<dialog id="viewer" class="{pixels.strip()}" style="--ratio:{width / height:.4f}"><img src="{src}" alt="Screenshot {shot["id"]}, enlarged"></dialog>'
         f'<script src="/static/box.js?v={version("box.js")}"></script>'

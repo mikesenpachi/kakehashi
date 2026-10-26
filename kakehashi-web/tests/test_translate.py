@@ -60,3 +60,23 @@ def test_page_shows_the_saved_translation(client, monkeypatch):
     page = client.get(f"/shot/{shot_id}").text
     assert '<div id="translation-card" class="card text-card">' in page
     assert "Let&#x27;s &lt;go&gt;." in page
+
+
+def test_an_edit_replaces_the_translation(client, monkeypatch):
+    monkeypatch.setattr(translate, "translate", lambda text: f"EN {text}")
+    shot_id = add_shot(client)
+    client.post(f"/shot/{shot_id}/translate", json={"text": "もう行こう。"})
+    response = client.post(f"/shot/{shot_id}/translation", json={"translation": " Let's go now. "})
+    assert response.json() == {"translation": "Let's go now."}
+    assert db.get_shot(shot_id)["translation"] == "Let's go now."
+
+
+def test_an_empty_edit_clears_the_translation(client):
+    shot_id = add_shot(client)
+    client.post(f"/shot/{shot_id}/translation", json={"translation": "Let's go."})
+    client.post(f"/shot/{shot_id}/translation", json={"translation": "  "})
+    assert db.get_shot(shot_id)["translation"] == ""
+
+
+def test_an_edit_of_a_missing_shot_is_404(client):
+    assert client.post("/shot/999/translation", json={"translation": "Hi"}).status_code == 404

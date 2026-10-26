@@ -3,11 +3,14 @@
 A box is (left, top, right, bottom) as fractions of the image, 0 to 1.
 """
 
+import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-DB = Path(__file__).parent / "data" / "kakehashi.db"
+# The data folder: images and the database. KAKEHASHI_DATA sets another one (for example a demo).
+DATA = Path(os.environ.get("KAKEHASHI_DATA") or Path(__file__).parent / "data")
+DB = DATA / "kakehashi.db"
 
 SCHEMA = """
 create table if not exists games (
